@@ -1,13 +1,16 @@
+from typing import List
+
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 """
 test8.py是test5.py数据处理的改进型
+从test8开始程序得以改进
 """
 plt.style.use("ggplot")
 
-number = 15
+number = 14
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
 with h5py.File(filename, 'r') as f:
@@ -55,6 +58,7 @@ with h5py.File(filename, 'r') as f:
     # 记录前一个索引的row_shift
     row_shift_pre = 1
     delete_index = []
+    max_index = max(df.index)
     # 根据近似相等关系重新建立索引
     for index, gmd1_time in enumerate(df['gmd1_timestamp_t']):
         nearest_index = np.argmin(np.abs(df['mso_timestamp_t'] - gmd1_time))
@@ -64,7 +68,7 @@ with h5py.File(filename, 'r') as f:
         if row_shift == 1:
             if row_shift_pre != row_shift:
                 if index - 1 > 0:
-                    delete_index.append(index - 1)
+                    delete_index.append(min((index - 1),max_index))
                     print(delete_index)
             # 将当前索引的gmd1_timestamp_t值保存到aligned_df
             aligned_df.loc[index, 'gmd1_timestamp_t'] = df.loc[index, 'gmd1_timestamp_t']
@@ -78,8 +82,8 @@ with h5py.File(filename, 'r') as f:
         elif row_shift == 2:
             if row_shift_pre != row_shift:
                 if index - 1 > 0:
-                    delete_index.append(index - 1)
-                    delete_index.append(index )
+                    delete_index.append(min((index - 1),max_index))
+                    delete_index.append(min(index,max_index))
                     print(delete_index)
             # 将当前索引的gmd1_timestamp_t值保存到aligned_df
             aligned_df.loc[index, 'gmd1_timestamp_t'] = df.loc[index, 'gmd1_timestamp_t']
@@ -91,12 +95,51 @@ with h5py.File(filename, 'r') as f:
             aligned_df.loc[index, 'mso_area_t'] = df.loc[index + 2, 'mso_area_t']
 
             row_shift_pre = row_shift
+        elif row_shift == 3:
+            if row_shift_pre != row_shift:
+                if index - 1 > 0:
+                    delete_index.append(min((index - 1),max_index))
+                    delete_index.append(min(index, max_index))
+                    delete_index.append(min((index + 1),max_index))
+                    print(delete_index)
+            # 将当前索引的gmd1_timestamp_t值保存到aligned_df
+            aligned_df.loc[index, 'gmd1_timestamp_t'] = df.loc[index, 'gmd1_timestamp_t']
+            # 将当前索引的gmd1_t值保存到aligned_df
+            aligned_df.loc[index, 'gmd1_t'] = df.loc[index, 'gmd1_t']
+            # 将下3个索引的mso_timestamp_t值保存到aligned_df
+            aligned_df.loc[index, 'mso_timestamp_t'] = df.loc[index + 3, 'mso_timestamp_t']
+            # 将下3个索引的mso_area_t值保存到aligned_df
+            aligned_df.loc[index, 'mso_area_t'] = df.loc[index + 3, 'mso_area_t']
+
+            row_shift_pre = row_shift
+
+        # 对于row_shift=4的情况
+        elif row_shift == 4:
+            if row_shift_pre!=row_shift:
+                if index-1>0:
+                    delete_index.append(min((index - 1),max_index))
+                    delete_index.append(min(index, max_index))
+                    delete_index.append(min((index + 1),max_index))
+                    delete_index.append(min((index +2 ),max_index))
+                    print(delete_index)
+
+            # 将当前索引的gmd1_timestamp_t值保存到aligned_df
+            aligned_df.loc[index, 'gmd1_timestamp_t'] = df.loc[index, 'gmd1_timestamp_t']
+            # 将当前索引的gmd1_t值保存到aligned_df
+            aligned_df.loc[index, 'gmd1_t'] = df.loc[index, 'gmd1_t']
+            # 将下4个索引的mso_timestamp_t值保存到aligned_df
+            aligned_df.loc[index, 'mso_timestamp_t'] = df.loc[index + 4, 'mso_timestamp_t']
+            # 将下4个索引的mso_area_t值保存到aligned_df
+            aligned_df.loc[index, 'mso_area_t'] = df.loc[index + 4, 'mso_area_t']
+
+            row_shift_pre = row_shift
+
 
         elif row_shift == 0:
 
             if row_shift_pre != row_shift:
                 if index - 1 > 0:
-                    delete_index.append(index - 1)
+                    delete_index.append(min((index - 1),max_index))
                     print(delete_index)
 
             # 将当前索引的gmd1_timestamp_t值保存到aligned_df
@@ -112,7 +155,7 @@ with h5py.File(filename, 'r') as f:
         elif row_shift == -1:
             if row_shift_pre != row_shift:
                 if index - 1>0:
-                    delete_index.append(index-1)
+                    delete_index.append(min((index - 1),max_index))
                     print(delete_index)
 
 
@@ -126,6 +169,7 @@ with h5py.File(filename, 'r') as f:
             aligned_df.loc[index, 'mso_area_t'] = df.loc[index , 'mso_area_t']
 
             row_shift_pre = row_shift
+
         print(f'Row shift for gmd1_timestamp_t at index {index}: {row_shift}')
 
     # 删除第一行
@@ -139,12 +183,12 @@ with h5py.File(filename, 'r') as f:
     # # aligned_df.reset_index(drop=True, inplace=True)
 
     aligned_df.drop(index= delete_index,inplace=True)
-
+    print("delete index:",delete_index)
     # idx = np.where(abs(aligned_df['gmd1_timestamp_t'] - aligned_df['mso_timestamp_t']) > 0.15)
     # print(idx)
 
-    # 找到相邻的mso_timestamp_t差值大于10的索引号
-    idx = np.where(abs(np.diff(aligned_df['mso_timestamp_t'])) > 0.5)
+    # 找到相邻的mso_timestamp_t差值大于0.3的索引号
+    idx = np.where(abs(np.diff(aligned_df['mso_timestamp_t'])) > 0.4)[0]+np.array(1)
     print(idx)
     # 打印结果
     print(aligned_df.iloc[idx])
@@ -177,7 +221,7 @@ with h5py.File(filename, 'r') as f:
     ax5.plot( aligned_df['mso_timestamp_t']-aligned_df['gmd1_timestamp_t'] , label="timestamp difference")
     ax5.set_xlabel("pulse number")
     ax5.set_ylabel("difference")
-    ax5.set_title("difference between\n %s \n and %s" % ("pd", "gmd"))
+    ax5.set_title("difference between %s and %s" % ("pd", "gmd"))
     ax5.legend()
 
     index1 = aligned_df['gmd1_timestamp_t'].index
@@ -201,3 +245,5 @@ with h5py.File(filename, 'r') as f:
     ax6.legend()
 
     plt.show()
+    # 保存图像
+    # plt.savefig(f'aligned_data{number}.png')

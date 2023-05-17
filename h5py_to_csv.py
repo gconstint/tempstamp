@@ -2,6 +2,8 @@ import h5py
 import pandas as pd
 import re
 import numpy as np
+
+# 下面的注释为循环版本
 # for i in range(0,23):
 #     filename = f'timestamp_test/2023-05-13/run{i}/data.hdf5'
 #     # 打开h5py文件
