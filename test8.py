@@ -10,7 +10,7 @@ test8.py是test5.py数据处理的改进型
 """
 plt.style.use("ggplot")
 
-number = 14
+number = 12
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
 with h5py.File(filename, 'r') as f:

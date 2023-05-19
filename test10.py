@@ -65,23 +65,28 @@ with h5py.File(filename, 'r') as f:
         row_shift = nearest_index - index
 
         if row_shift_pre != row_shift and index - 1 > 0:
-            for i in range(np.abs(row_shift_pre - row_shift) + 1):
+            # for i in range(np.abs(row_shift_pre - row_shift) + 1):
+            #
+            #     delete_index.append(min((index - 1 + i),max_index))
 
-                delete_index.append(min((index - 1 + i),max_index))
+            # 上面代码替换为列表推导式
+            delete_index.extend([index - 1 + i for i in range(np.abs(row_shift_pre - row_shift) + 1) if index - 1 + i <= max_index])
             print(delete_index)
 
         # 将当前索引的gmd1_timestamp_t值保存到aligned_df
         aligned_df.loc[index, 'gmd1_timestamp_t'] = df.loc[index, 'gmd1_timestamp_t']
         # 将当前索引的gmd1_t值保存到aligned_df
         aligned_df.loc[index, 'gmd1_t'] = df.loc[index, 'gmd1_t']
-        # 将下一个索引的mso_timestamp_t值保存到aligned_df
+        # 将下row_shift个索引的mso_timestamp_t值保存到aligned_df
         aligned_df.loc[index, 'mso_timestamp_t'] = df.loc[index + row_shift, 'mso_timestamp_t']
-        # 将下一个索引的mso_area_t值保存到aligned_df
+        # 将下row_shift个索引的mso_area_t值保存到aligned_df
         aligned_df.loc[index, 'mso_area_t'] = df.loc[index + row_shift, 'mso_area_t']
         row_shift_pre = row_shift
 
+        if row_shift in [1,2]:
+            print(f'Row shift for gmd1_timestamp_t at index {index}: {row_shift}')
 
-        print(f'Row shift for gmd1_timestamp_t at index {index}: {row_shift}')
+        # print(f'Row shift for gmd1_timestamp_t at index {index}: {row_shift}')
 
     # 删除第一行
     # df.dropna(inplace=True)
