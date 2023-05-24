@@ -7,10 +7,11 @@ test10.py是test8.py数据处理的改进型
 主要针对分界情况的处理,改进后会删除异常点前后的数据
 从test8开始程序得以改进
 test10较好于test8，并且代码更加简洁
+test10是插值版本
 """
 plt.style.use("ggplot")
 
-number = 14
+number = 12
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
 with h5py.File(filename, 'r') as f:

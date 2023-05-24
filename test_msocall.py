@@ -110,7 +110,7 @@ PV1=epics.PV(pvname1,auto_monitor=True,callback=GMD1_data_callback)
 
 PV2=epics.PV(pvname2,auto_monitor=True,callback=msoArea_data_callback)
 
-#PV3=epics.PV(pvname3,auto_monitor=True,callback=msoTimestamp_data_callback)
+PV3=epics.PV(pvname3,auto_monitor=True,callback=msoTimestamp_data_callback)
 
 while True:
     if (number1==data_number) and (number2==data_number):
