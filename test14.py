@@ -2,13 +2,12 @@ import h5py
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import pearsonr
-
+from scipy.stats import pearsonr,linregress
 """
 test14是test14的改进型，进一步优化了速度问题，以及代码规范
 """
-number = 12
-
+number = 6
+linear_flag = True
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
 with h5py.File(filename, 'r') as f:
@@ -60,7 +59,7 @@ for delta_t in np.arange(-max_delta_t, max_delta_t + 0.001, 0.001):
         best_delta_t = delta_t
 
     print('delta_t:', delta_t, 'corr_coef:', corr_coef)
-
+# best_delta_t = 0.195
 print('best delta_t:', best_delta_t)
 print('best corr_coef:', max_corr_coef)
 
@@ -84,11 +83,39 @@ for index, gmd1_time in enumerate(gmd1_timestamp_t_values):
         row_shift_pre = row_shift
 
 aligned_df['gmd1_timestamp_t'] = aligned_df['gmd1_timestamp_t'] + best_delta_t
-aligned_df = aligned_df[~aligned_df.index.isin(delete_index)]
+# 现在这一段可以删除掉，，下面的线性回归拟合，已经去掉了疑似异常值
+# aligned_df = aligned_df[~aligned_df.index.isin(delete_index)]
+print(len(aligned_df))
 
+
+### 方法1
+if linear_flag:
+    # 计算线性回归模型
+    slope, intercept, _, _, _ = linregress(aligned_df['gmd1_t'], aligned_df['mso_area_t'])
+
+    # 计算残差
+    residuals = aligned_df['mso_area_t'] - (slope * aligned_df['gmd1_t'] + intercept)
+
+    # 设置拟合残差阈值，超过阈值的行将被删除
+    threshold = 1 * np.std(residuals)  # 可根据需要调整阈值
+
+    # 删除拟合残差超过阈值的行
+    aligned_df = aligned_df[np.abs(residuals) < threshold]
+
+    # 重新计算相关系数
+    corr_coef = pearsonr(aligned_df['gmd1_t'].tolist(), aligned_df['mso_area_t'].tolist())[0]
+
+    # 打印相关系数结果
+    print('Original correlation coefficient:', corr_coef)
+    print(len(aligned_df))
+
+
+
+
+### 分割线
 # 绘制符合要求的gmd1_t数据点
 fig = plt.figure(figsize=(6, 4))
-fig.suptitle('test13' + filename)
+fig.suptitle('test14' + filename)
 ax = fig.add_subplot(1, 4, 1)
 # ax.plot(aligned_df['gmd1_timestamp_t'], aligned_df['gmd1_t'], label='(new)gmd1_t', c='red')
 ax.scatter(aligned_df['gmd1_t'], aligned_df['mso_area_t'], label='gmd1_t vs mso_area_t', c='red')

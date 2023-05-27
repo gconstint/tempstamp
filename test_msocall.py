@@ -69,7 +69,7 @@ def GMD1_data_callback(pvname,value,timestamp,**kwargs):
     global DEBUG_FLAG
     global number1
     if number1<data_number:
-        if DEBUG_FLAG==True:
+        if DEBUG_FLAG:
             print(value,timestamp,number1)
         GMD1[number1]=value
         GMD1Timestamp[number1]=timestamp
@@ -83,7 +83,7 @@ def msoArea_data_callback(pvname,value,timestamp,**kwargs):
     global DEBUG_FLAG
     global number2
     if number2<data_number:
-        if DEBUG_FLAG==True:
+        if DEBUG_FLAG:
             print(value,timestamp,number2)
         msoArea[number2]=value
         msoTimestamp[number2]=timestamp

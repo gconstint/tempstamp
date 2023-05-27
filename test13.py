@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 """
 test13.py是test12的速度优化版本"""
-number = 12
+number = 6
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
 with h5py.File(filename, 'r') as f:

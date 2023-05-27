@@ -6,7 +6,7 @@ import pandas as pd
 plt.style.use("ggplot")
 """
 test12.py是最佳德塔t的遍历版本"""
-number = 14
+number = 22
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
 with h5py.File(filename, 'r') as f:
@@ -38,7 +38,7 @@ with h5py.File(filename, 'r') as f:
     # 新建一个空的DataFrame
     aligned_df = pd.DataFrame(columns=['gmd1_timestamp_t', 'gmd1_t', 'mso_timestamp_t', 'mso_area_t'])
 
-    for delta_t in np.arange(-max_delta_t, max_delta_t + 0.1, 0.1):
+    for delta_t in np.arange(-max_delta_t, max_delta_t + 0.01, 0.01):
         for index, gmd1_time in enumerate(df['gmd1_timestamp_t']):
             gmd1_time = gmd1_time + delta_t
             nearest_index = np.argmin(np.abs(df['mso_timestamp_t']- gmd1_time))
