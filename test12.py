@@ -6,7 +6,7 @@ import pandas as pd
 plt.style.use("ggplot")
 """
 test12.py是最佳德塔t的遍历版本"""
-number = 22
+number = 6
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
 with h5py.File(filename, 'r') as f:

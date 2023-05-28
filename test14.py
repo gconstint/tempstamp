@@ -6,7 +6,7 @@ from scipy.stats import pearsonr,linregress
 """
 test14是test14的改进型，进一步优化了速度问题，以及代码规范
 """
-number = 6
+number = 2
 linear_flag = True
 filename = f'timestamp_test/2023-05-13/run{number}/data.hdf5'
 
@@ -37,7 +37,7 @@ max_corr_coef = 0
 aligned_df = pd.DataFrame()
 
 mso_timestamp_t_copy = df['mso_timestamp_t'].copy()  # 创建 mso_timestamp_t 的副本
-mso_timestamp_t_values = df['mso_timestamp_t'].values
+mso_timestamp_t_values = mso_timestamp_t_copy.values
 gmd1_timestamp_t_values = df['gmd1_timestamp_t'].values
 
 for delta_t in np.arange(-max_delta_t, max_delta_t + 0.001, 0.001):
@@ -74,13 +74,13 @@ for index, gmd1_time in enumerate(gmd1_timestamp_t_values):
     row_shift = nearest_index - index
     if row_shift_pre != row_shift and index - 1 > 0:
         delete_index.extend([index - 1 + i for i in range(np.abs(row_shift_pre - row_shift) + 1) if index - 1 + i <= max_index])
-
-    if np.min(np.abs(mso_timestamp_t_values - gmd1_time)) < 0.05:
-        aligned_df['gmd1_timestamp_t'].values[index] = gmd1_timestamp_t_values[index]
-        aligned_df['gmd1_t'].values[index] = df['gmd1_t'].values[index]
-        aligned_df['mso_timestamp_t'].values[index] = df['mso_timestamp_t'].values[nearest_index]
-        aligned_df['mso_area_t'].values[index] = df['mso_area_t'].values[nearest_index]
-        row_shift_pre = row_shift
+    #  罪魁祸首 这里不应该设置这个if判断
+    # if np.min(np.abs(mso_timestamp_t_values - gmd1_time)) < 1:
+    aligned_df['gmd1_timestamp_t'].values[index] = gmd1_timestamp_t_values[index]
+    aligned_df['gmd1_t'].values[index] = df['gmd1_t'].values[index]
+    aligned_df['mso_timestamp_t'].values[index] = df['mso_timestamp_t'].values[nearest_index]
+    aligned_df['mso_area_t'].values[index] = df['mso_area_t'].values[nearest_index]
+    row_shift_pre = row_shift
 
 aligned_df['gmd1_timestamp_t'] = aligned_df['gmd1_timestamp_t'] + best_delta_t
 # 现在这一段可以删除掉，，下面的线性回归拟合，已经去掉了疑似异常值
@@ -91,7 +91,7 @@ print(len(aligned_df))
 ### 方法1
 if linear_flag:
     # 计算线性回归模型
-    slope, intercept, _, _, _ = linregress(aligned_df['gmd1_t'], aligned_df['mso_area_t'])
+    slope, intercept, _, _, _ = linregress(aligned_df['gmd1_t'].tolist(), aligned_df['mso_area_t'].tolist())
 
     # 计算残差
     residuals = aligned_df['mso_area_t'] - (slope * aligned_df['gmd1_t'] + intercept)
